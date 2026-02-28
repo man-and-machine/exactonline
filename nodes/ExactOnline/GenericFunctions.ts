@@ -194,7 +194,7 @@ export async function getEndpointConfig(this: IExecuteFunctions | IExecuteSingle
 	service:string,
 	endpoint:string){
 
-	return config.filter(x => x.service.toLocaleLowerCase() === service && x.endpoint ===endpoint)[0];
+	return config.filter(x => x.service.toLocaleLowerCase() === service.toLocaleLowerCase() && x.endpoint ===endpoint)[0];
 
 }
 
