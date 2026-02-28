@@ -1,0 +1,90 @@
+{
+  "name": "Create Sales Order - Exact Online",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "id": "trigger-1",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "division": "={{ $json.division }}",
+        "service": "SalesOrder",
+        "resource": "SalesOrders",
+        "operation": "post",
+        "useManualBody": true,
+        "manualBody": "={{ JSON.stringify({ \"OrderedBy\": $json.customerGuid, \"OrderDate\": $json.orderDate, \"YourRef\": $json.yourReference, \"Description\": $json.description, \"Currency\": $json.currency, \"PaymentCondition\": $json.paymentCondition, \"DeliveryDate\": $json.deliveryDate, \"IncotermCode\": $json.incotermCode, \"IncotermAddress\": $json.incotermAddress, \"Remarks\": $json.remarks, \"SalesOrderLines\": $json.salesOrderLines }) }}"
+      },
+      "type": "@datafix/n8n-nodes-exact-online.exactOnline",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "id": "exact-online-1",
+      "name": "Create Sales Order",
+      "credentials": {
+        "exactOnlineApiOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"division\": \"YOUR_DIVISION_CODE\",\n  \"customerGuid\": \"00000000-0000-0000-0000-000000000000\",\n  \"orderDate\": \"2026-02-26\",\n  \"yourReference\": \"Ord. n. 239/LS del 06/02/2026\",\n  \"description\": \"Sales Order for ESSECO s.r.l.\",\n  \"currency\": \"EUR\",\n  \"paymentCondition\": \"30\",\n  \"deliveryDate\": \"2026-03-11\",\n  \"incotermCode\": \"EXW\",\n  \"incotermAddress\": \"\",\n  \"remarks\": \"HS-code: 28321000 | Country of origin: Netherlands\",\n  \"salesOrderLines\": [\n    {\n      \"Item\": \"00000000-0000-0000-0000-000000000000\",\n      \"Description\": \"Sodium Bisulphite Solution 38-40%\",\n      \"Quantity\": 23000,\n      \"UnitPrice\": 0.165,\n      \"UnitCode\": \"kg\",\n      \"VATCode\": \"0\",\n      \"DeliveryDate\": \"2026-03-11\",\n      \"Notes\": \"20 x Bigbag 1200L\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300],
+      "id": "set-data-1",
+      "name": "Set Order Data"
+    },
+    {
+      "parameters": {
+        "content": "## How to use this workflow\n\n### 1. Configure credentials\nClick the **Create Sales Order** node and select your Exact Online OAuth2 credentials.\n\n### 2. Fill in your data\nEdit the **Set Order Data** node with your actual values:\n\n- **division**: Your Exact Online division code (number)\n- **customerGuid**: The GUID of the customer account (OrderedBy) — find this in Exact Online under CRM > Accounts\n- **salesOrderLines**: Array of line items, each requiring at minimum an **Item** GUID\n\n### 3. Sales Order Lines fields\nEach line item in the `salesOrderLines` array supports:\n\n| Field | Type | Required | Description |\n|-------|------|----------|-------------|\n| Item | guid | Yes | Article/item GUID |\n| Description | string | No | Line description |\n| Quantity | number | No | Quantity (default 1) |\n| UnitPrice | number | No | Price per unit |\n| NetPrice | number | No | Net price (overrides calculation) |\n| Discount | number | No | Discount % (0-100) |\n| VATCode | string | No | VAT code |\n| UnitCode | string | No | Unit of measure (kg, pcs, etc.) |\n| DeliveryDate | datetime | No | Line delivery date |\n| Notes | string | No | Line notes |\n| CostCenter | string | No | Cost center code |\n| CostUnit | string | No | Cost unit code |\n| Project | guid | No | Project GUID |\n| Pricelist | guid | No | Price list GUID |\n\n### 4. Header fields\n\n| Field | API Name | Type | Description |\n|-------|----------|------|-------------|\n| Customer | OrderedBy | guid | **Required** — Customer account GUID |\n| Order Date | OrderDate | datetime | Order date |\n| Your Reference | YourRef | string | Customer's PO/reference |\n| Description | Description | string | Order description |\n| Currency | Currency | string | e.g. EUR, USD |\n| Payment Condition | PaymentCondition | string | Payment term code |\n| Delivery Date | DeliveryDate | datetime | Header delivery date |\n| Incoterm | IncotermCode | string | e.g. EXW, FOB, CIF |\n| Incoterm Address | IncotermAddress | string | Incoterm location |\n| Remarks | Remarks | string | Internal remarks |\n| Deliver To | DeliverTo | guid | Delivery account |\n| Deliver To Contact | DeliverToContactPerson | guid | Delivery contact |\n| Delivery Address | DeliveryAddress | guid | Delivery address |\n| Invoice To | InvoiceTo | guid | Invoice account |\n| Salesperson | Salesperson | guid | Salesperson GUID |\n| Warehouse | WarehouseID | guid | Warehouse GUID |\n| Shipping Method | ShippingMethod | guid | Shipping method |\n| Discount | Discount | number | Header discount % |",
+        "width": 520,
+        "height": 880
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [800, -80],
+      "id": "sticky-1",
+      "name": "Instructions"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Order Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Order Data": {
+      "main": [
+        [
+          {
+            "node": "Create Sales Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0
+}
